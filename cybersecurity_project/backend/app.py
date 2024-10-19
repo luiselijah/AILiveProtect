@@ -45,7 +45,7 @@ def signup():
 
     return jsonify({"message": "User created successfully"}), 201
 
-    pass
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
