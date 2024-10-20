@@ -26,6 +26,8 @@ jwt = JWTManager(app)
 
 class User(dBase.Model):
     id = dBase.Column(dBase.Integer, primary_key = True)
+    username = dBase.Column(dBase.String(30), unique=True, nullable=False)
+    password = dBase.Column(dBase.String(15), nullable=False)
 
 @app.route('/')
 def home():
