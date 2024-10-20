@@ -10,8 +10,10 @@ app = Flask(__name__)
 secureKey = secrets.token_hex(64)
 jwtKey = secrets.token_hex(64)
 
+dbPath = os.path.join(os.path.dirname(__file__), 'transactions.db')
+
 #line 14 not done, ewan ko pa pano i link url to this
-app.config['SQLALCHEMY_DATABASE_URI']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + dbPath
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secureKey)
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', jwtKey)
 
@@ -31,8 +33,8 @@ def home():
 @app.route('/signup')
 def signup():
     data = request.get_json()
-    username = data[username]
-    password = data[password]
+    username = data['username']
+    password = data['password']
 
     user = User.query.filter_by(username = username).first()
     if user:
@@ -45,7 +47,26 @@ def signup():
 
     return jsonify({"message": "User created successfully"}), 201
 
+@app.route('/login', methods = ['POST'])
+def login():
+    data = request.get_json()
+    username = data['username']
+    password = data['password']
+
+    user = User.query.filter_by(username = username).first()
+
+    if not user or not bCrypt.check_password_hash(user.password, password):
+        return jsonify({"error": "Invalid user or password"}), 401
     
+    accessToken = create_access_token(identity = username)
+    return jsonify({"Access token": accessToken}), 200
+    
+@app.route('/dashboard', methods = ['GET'])
+@jwt_required()
+
+def dashboard():
+    currentUser = get_jwt_identity()
+    return jsonify({"Message": "something remind me to change this part" })
 
 if __name__ == '__main__':
     app.run(debug=True)
